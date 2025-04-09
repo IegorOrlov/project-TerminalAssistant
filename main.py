@@ -7,7 +7,8 @@ from command_handlers import (
     show_birthday,
     birthdays,
     add_address,
-    add_email
+    add_email,
+    add_contact_interactive
 )
 from address_book import AddressBook
 from data_service import save_data, load_data
@@ -34,6 +35,8 @@ def main():
             print("How can I help you?")
         elif command == "add":
             print(add_contact(args, book))
+        elif command == "add-interactive":
+            print(add_contact_interactive(book))
         elif command == "change":
             print(change_contact(args, book))
         elif command == "phone":
