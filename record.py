@@ -33,13 +33,28 @@ class Birthday(Field):
 
     def __str__(self) -> str:
         return self.value.strftime("%d.%m.%Y")
+    
+class Address(Field):
+    def __init__(self, value: str) -> None:
+        if not value.strip():
+            raise ValueError("Address cannot be empty.")
+        super().__init__(value)
 
+
+class Email(Field):
+    def __init__(self, value: str) -> None:
+        if re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", value):
+            super().__init__(value)
+        else:
+            raise ValueError(f"Invalid email address: {value}")
 
 class Record:
     def __init__(self, name: str) -> None:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        self.address = None
+        self.email = None
 
     def add_birthday(self, birthday: str) -> None:
         self.birthday = Birthday(birthday)
@@ -47,17 +62,21 @@ class Record:
     def add_phone(self, phone_number: str) -> None:
         self.phones.append(Phone(phone_number))
 
+    def add_address(self, address: str) -> None:
+        self.address = Address(address)
+
+    def add_email(self, email: str) -> None:
+        self.email = Email(email)
+
     def find_phone(self, phone_number: str) -> Phone:
         for phone in self.phones:
             if phone_number == phone.value:
                 return phone
-            else:
-                raise ValueError("A phone with {phone_number} number is not found")
+        raise ValueError("A phone with {phone_number} number is not found")
 
     def remove_phone(self, phone_number: str) -> None:
         phone = self.find_phone(phone_number)
-        if phone:
-            self.phones.remove(phone)
+        self.phones.remove(phone)
 
     def edit_phone(self, old_phone_number: str, new_phone_number: str) -> None:
         phone = self.find_phone(old_phone_number)
@@ -69,4 +88,13 @@ class Record:
             )
 
     def __str__(self) -> str:
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+        parts = [f"Name: {self.name.value}"]
+        if self.phones:
+            parts.append(f"Phones: {'; '.join(p.value for p in self.phones)}")
+        if self.birthday:
+            parts.append(f"Birthday: {self.birthday}")
+        if self.address:
+            parts.append(f"Address: {self.address}")
+        if self.email:
+            parts.append(f"Email: {self.email}")
+        return ", ".join(parts)

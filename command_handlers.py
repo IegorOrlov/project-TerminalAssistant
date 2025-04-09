@@ -70,3 +70,24 @@ def birthdays(book: AddressBook) -> str:
         f"Upcoming {record.name}'s birthday is {record.birthday}"
         for record in book.get_upcoming_birthdays()
     )
+
+@input_error
+def add_address(args: tuple[str], book: AddressBook) -> str:
+    name, address, *_ = args
+    record = book.find(name)
+    if record:
+        record.add_address(address)
+        return f"Address '{address}' has been added for contact '{name}'."
+    else:
+        return f"User {name} not found."
+
+
+@input_error
+def add_email(args: tuple[str], book: AddressBook) -> str:
+    name, email, *_ = args
+    record = book.find(name)
+    if record:
+        record.add_email(email)
+        return f"Email '{email}' has been added for contact '{name}'."
+    else:
+        return f"User {name} not found."
