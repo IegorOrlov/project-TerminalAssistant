@@ -1,4 +1,4 @@
-from error_hendlers import input_error
+from error_handlers import input_error
 from address_book import AddressBook
 from record import Record
 
@@ -38,10 +38,10 @@ def show_phone(args: tuple[str], book: AddressBook) -> str:
 
 @input_error
 def show_all(book: AddressBook) -> str:
-    str = ""
+    result = ""
     for name, record in book.items():
-        str = str + f"{record}\n"
-    return str.strip()
+        result = result + f"{record}\n"
+    return result.strip()
 
 
 @input_error
