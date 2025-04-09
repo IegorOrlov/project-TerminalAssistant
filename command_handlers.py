@@ -2,7 +2,7 @@ from error_handlers import input_error
 from address_book import AddressBook
 from record import Record
 
-def add_contact_interactive(book: AddressBook) -> str:
+def add_contact(book: AddressBook) -> str:
     while True:
         name = input("Enter the name: ").strip()
         if name:
@@ -66,20 +66,6 @@ def add_contact_interactive(book: AddressBook) -> str:
             print(f"Error adding birthday: {e}")
 
     return f"Contact '{name}' has been saved successfully."
-
-@input_error
-def add_contact(args: tuple[str], book: AddressBook) -> str:
-    name, phone, *_ = args
-    record = book.find(name)
-    message = "Contact updated."
-    if record is None:
-        record = Record(name)
-        book.add_record(record)
-        message = "Contact added."
-    if phone:
-        record.add_phone(phone)
-    return message
-
 
 @input_error
 def change_contact(args: tuple[str], book: AddressBook) -> str:
