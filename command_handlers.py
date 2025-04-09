@@ -130,9 +130,25 @@ def show_birthday(args: tuple[str], book: AddressBook) -> str:
 
 @input_error
 def birthdays(book: AddressBook) -> str:
+    while True:
+        days_input = input("Enter the number of days (default is 7): ").strip()
+        if not days_input:
+            days = 7
+            break
+        try:
+            days = int(days_input)
+            if days <= 0:
+                print("Number of days cannot be zero or negative. Defaulting to 7.")
+                days = 7
+            break
+        except ValueError:
+            print("Invalid input. Please enter a valid number or press Enter to use default (7).")
+    
+    upcoming = book.get_upcoming_birthdays(days)
+    if not upcoming:
+        return f"No birthdays in the next {days} days."
     return "\n".join(
-        f"Upcoming {record.name}'s birthday is {record.birthday}"
-        for record in book.get_upcoming_birthdays()
+        f"Upcoming {record.name.value}'s birthday is {record.birthday}" for record in upcoming
     )
 
 @input_error

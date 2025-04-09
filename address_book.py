@@ -13,6 +13,6 @@ class AddressBook(UserDict[str, Record]):
     def delete(self, name: str) -> Record:
         return self.data.pop(name)
 
-    def get_upcoming_birthdays(self) -> list[Record]:
-        return bs.get_upcoming_birthdays(self.data.values())
+    def get_upcoming_birthdays(self, days: int = 7) -> list[Record]:
+        return bs.get_upcoming_birthdays(self.data.values(), days)
 

@@ -12,17 +12,18 @@ def get_congratilation_date(birthday: Birthday, year: int) -> dada.date:
     return congratilation_date
 
 
-def get_upcoming_birthdays(records: list[Record]) -> list[Record]:
+def get_upcoming_birthdays(records: list[Record], days: int = 7) -> list[Record]:
     result = []
     today = dada.today().date()
     for record in records:
         if record.birthday:
             congratulation_date = get_congratilation_date(record.birthday, today.year)
-            delta = congratulation_date - today
-            if delta.days < 0:
+            delta = (congratulation_date - today).days
+            if delta < 0:
                 congratulation_date = get_congratilation_date(
                     record.birthday, today.year + 1
                 )
-            if (delta.days < 7) and (delta.days >= 0):
+                delta = (congratulation_date - today).days
+            if 0 <= delta < days:
                 result.append(record)
     return result
