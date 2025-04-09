@@ -2,6 +2,70 @@ from error_handlers import input_error
 from address_book import AddressBook
 from record import Record
 
+def add_contact_interactive(book: AddressBook) -> str:
+    while True:
+        name = input("Enter the name: ").strip()
+        if name:
+            break
+        print("Name is required. Please enter a valid name.")
+
+    record = book.find(name)
+    if record is None:
+        record = Record(name)
+        book.add_record(record)
+        print(f"Contact '{name}' created.")
+    else:
+        print(f"Contact '{name}' already exists. Its information will be updated.")
+
+    while True:
+        phone = input("Enter phone (or press Enter to skip): ").strip()
+        if phone:
+            try:
+                record.add_phone(phone)
+                print(f"Phone '{phone}' added.")
+            except ValueError as e:
+                print(f"Error adding phone: {e}")
+                continue
+            add_more = input("Do you want to enter one more phone number? (y/n): ").strip().lower()
+            if add_more != "y":
+                break
+        else:
+            break
+
+    while True:
+        email = input("Enter email (or press Enter to skip): ").strip()
+        if not email:
+            break
+        try:
+            record.add_email(email)
+            print(f"Email '{email}' added.")
+            break
+        except ValueError as e:
+            print(f"Error adding email: {e}")
+
+    while True:
+        address = input("Enter address (or press Enter to skip): ").strip()
+        if not address:
+            break
+        try:
+            record.add_address(address)
+            print(f"Address '{address}' added.")
+            break
+        except ValueError as e:
+            print(f"Error adding address: {e}")
+
+    while True:
+        birthday = input("Enter birthday (DD.MM.YYYY) (or press Enter to skip): ").strip()
+        if not birthday:
+            break
+        try:
+            record.add_birthday(birthday)
+            print(f"Birthday '{birthday}' added.")
+            break
+        except ValueError as e:
+            print(f"Error adding birthday: {e}")
+
+    return f"Contact '{name}' has been saved successfully."
 
 @input_error
 def add_contact(args: tuple[str], book: AddressBook) -> str:
