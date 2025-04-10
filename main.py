@@ -1,13 +1,10 @@
 from command_handlers import (
     add_contact,
-    change_contact,
+    update_contact,
     show_phone,
     show_all,
-    add_birthday,
     show_birthday,
     birthdays,
-    add_address,
-    add_email
 )
 from address_book import AddressBook
 from data_service import save_data, load_data
@@ -34,22 +31,16 @@ def main():
             print("How can I help you?")
         elif command == "add-contact":
             print(add_contact(book))
-        elif command == "change":
-            print(change_contact(args, book))
+        elif command == "update-contact": 
+            print(update_contact(book))
         elif command == "phone":
             print(show_phone(args, book))
         elif command == "all":
-            print(show_all(book))
-        elif command == "add-birthday":
-            print(add_birthday(args, book))
+            show_all(book)
         elif command == "show-birthday":
             print(show_birthday(args, book))
         elif command == "birthdays":
             print(birthdays(book))
-        elif command == "add-address":
-            print(add_address(args, book))
-        elif command == "add-email":
-            print(add_email(args, book))
         else:
             print("Invalid command.")
 
