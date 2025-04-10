@@ -1,6 +1,7 @@
 from command_handlers import (
     add_contact,
     update_contact,
+    delete_contact,
     show_phone,
     show_all,
     show_birthday,
@@ -33,6 +34,8 @@ def main():
             print(add_contact(book))
         elif command == "update-contact": 
             print(update_contact(book))
+        elif command == "delete-contact":
+            print(delete_contact(book))
         elif command == "phone":
             print(show_phone(args, book))
         elif command == "all":

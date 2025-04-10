@@ -2,7 +2,7 @@ from error_handlers import input_error
 from address_book import AddressBook
 from record import Record
 from rich.console import Console
-from rich_helper import create_rich_table
+from rich_helper import create_rich_table, create_contact_table
 
 def add_contact(book: AddressBook) -> str:
     while True:
@@ -82,14 +82,7 @@ def update_contact(book: AddressBook) -> str:
     if not record:
         return f"Contact '{name}' not found."
 
-    current_fields = [
-        ["Name", record.name.value],
-        ["Phone(s)", "; ".join(p.value for p in record.phones) if record.phones else "Not set"],
-        ["Address", str(record.address) if record.address else "Not set"],
-        ["Email", str(record.email) if record.email else "Not set"],
-        ["Birthday", str(record.birthday) if record.birthday else "Not set"],
-    ]
-    current_table = create_rich_table("Current Record", ["Field", "Value"], current_fields)
+    current_table = create_contact_table("Current Record", record)
     console.print(current_table)
     
     available_fields = ["phone", "address", "email", "birthday"]
@@ -155,6 +148,34 @@ def update_contact(book: AddressBook) -> str:
                     return f"Error removing phone: {e}"
 
 
+
+@input_error
+def delete_contact(book: AddressBook) -> str:
+    console = Console()
+    
+    while True:
+        name = input("Enter the contact name to delete: ").strip()
+        if name:
+            break
+        print("Contact name cannot be empty.")
+    
+    record = book.find(name)
+    if not record:
+        return f"Contact '{name}' not found."
+
+    current_table = create_contact_table("Contact to Delete", record)
+    console.print(current_table)
+    
+    confirmation = input(f"Are you sure you want to delete contact '{name}'? (y/n): ").strip().lower()
+    if confirmation != "y":
+        return "Deletion cancelled."
+    
+    try:
+        book.delete(name)
+        return f"Contact '{name}' was deleted successfully."
+    except KeyError:
+        return f"Error: Contact '{name}' not found during deletion."
+    
 @input_error
 def show_phone(args: tuple[str], book: AddressBook) -> str:
     name, *_ = args
