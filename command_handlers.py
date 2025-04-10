@@ -3,6 +3,11 @@ from address_book import AddressBook
 from record import Record
 from rich.console import Console
 from rich_helper import create_rich_table, create_contact_table
+from note_book import NoteBook, Note
+from typing import Callable
+
+REQUIRED_MSG = "Enter required value of {}: "
+
 
 def add_contact(book: AddressBook) -> str:
     while True:
@@ -28,7 +33,11 @@ def add_contact(book: AddressBook) -> str:
             except ValueError as e:
                 print(f"Error adding phone: {e}")
                 continue
-            add_more = input("Do you want to enter one more phone number? (y/n): ").strip().lower()
+            add_more = (
+                input("Do you want to enter one more phone number? (y/n): ")
+                .strip()
+                .lower()
+            )
             if add_more != "y":
                 break
         else:
@@ -57,7 +66,9 @@ def add_contact(book: AddressBook) -> str:
             print(f"Error adding address: {e}")
 
     while True:
-        birthday = input("Enter birthday (DD.MM.YYYY) (or press Enter to skip): ").strip()
+        birthday = input(
+            "Enter birthday (DD.MM.YYYY) (or press Enter to skip): "
+        ).strip()
         if not birthday:
             break
         try:
@@ -68,6 +79,43 @@ def add_contact(book: AddressBook) -> str:
             print(f"Error adding birthday: {e}")
 
     return f"Contact '{name}' has been saved successfully."
+
+
+def find_note(note_book: NoteBook) -> str:
+    title = input("Enter a title to search: ")
+    return note_book.find(title)
+
+
+def add_note(note_book: NoteBook) -> None:
+    note = Note()
+    __enter_value("title", note.add_title, True, REQUIRED_MSG)
+    __enter_value("text", note.add_text, True, REQUIRED_MSG)
+    __enter_value(
+        "tags",
+        note.add_tags,
+        False,
+        "Enter {} separated by spaces (or press Enter to skip): ",
+    )
+    note_book.add_note(note)
+
+
+def __enter_value(
+    value_name: str,
+    consumer: Callable[[str], None],
+    is_required=False,
+    input_msg: str = "Enter {} (or press Enter to skip): ",
+):
+    while True:
+        value = input(input_msg.format(value_name)).strip()
+        if not value and not is_required:
+            break
+        try:
+            consumer(value)
+            print(f"{value_name.capitalize()} '{value}' added.")
+            break
+        except ValueError as e:
+            print(f"Error adding {value_name}: {e}")
+
 
 @input_error
 def update_contact(book: AddressBook) -> str:
@@ -268,11 +316,14 @@ def birthdays(book: AddressBook) -> str:
                 days = 7
             break
         except ValueError:
-            print("Invalid input. Please enter a valid number or press Enter to use default (7).")
-    
+            print(
+                "Invalid input. Please enter a valid number or press Enter to use default (7)."
+            )
+
     upcoming = book.get_upcoming_birthdays(days)
     if not upcoming:
         return f"No birthdays in the next {days} days."
     return "\n".join(
-        f"Upcoming {record.name.value}'s birthday is {record.birthday}" for record in upcoming
+        f"Upcoming {record.name.value}'s birthday is {record.birthday}"
+        for record in upcoming
     )

@@ -6,10 +6,13 @@ from command_handlers import (
     show_all,
     show_birthday,
     birthdays,
-    search_contact
+    search_contact,
+    add_note,
+    find_note
 )
 from address_book import AddressBook
 from data_service import save_data, load_data
+from note_book import NoteBook
 
 
 def parse_input(user_input: str) -> tuple[str, tuple[str]]:
@@ -19,34 +22,40 @@ def parse_input(user_input: str) -> tuple[str, tuple[str]]:
 
 
 def main():
-    book = load_data()
+    address_book, note_book = load_data()
     print("Welcome to the assistant bot!")
     while True:
         user_input = input("Enter a command: ")
         command, *args = parse_input(user_input)
 
         if command in ["close", "exit"]:
-            save_data(book)
+            save_data(address_book, note_book)
             print("Good bye!")
             break
         elif command == "hello":
             print("How can I help you?")
         elif command == "add-contact":
-            print(add_contact(book))
+            print(add_contact(address_book))
+        elif command == "add-note":
+            print(add_note(note_book))
         elif command == "update-contact": 
-            print(update_contact(book))
+            print(update_contact(address_book))
         elif command == "delete-contact":
-            print(delete_contact(book))
+            print(delete_contact(address_book))
         elif command == "search-contact":
-            print(search_contact(book))
+            print(search_contact(address_book))
         elif command == "phone":
-            print(show_phone(args, book))
-        elif command == "all":
-            show_all(book)
+            print(show_phone(args, address_book))
+        elif command == "all-records":
+            print(show_all(address_book))
+        # elif command == "all-notes":
+            # print(show_all(note_book))
+        elif command == "find-note":
+            print(find_note(note_book))
         elif command == "show-birthday":
-            print(show_birthday(args, book))
+            print(show_birthday(args, address_book))
         elif command == "birthdays":
-            print(birthdays(book))
+            print(birthdays(address_book))
         else:
             print("Invalid command.")
 
