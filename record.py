@@ -16,7 +16,7 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, phone_number: str):
-        if re.match(r"^\d{10}$", phone_number):
+        if re.fullmatch(r"\d{10}", phone_number):
             super().__init__(phone_number)
         else:
             raise ValueError(
@@ -43,7 +43,7 @@ class Address(Field):
 
 class Email(Field):
     def __init__(self, value: str) -> None:
-        if re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", value):
+        if re.fullmatch(r"[\w\.-]+@[\w\.-]+\.\w+", value):
             super().__init__(value)
         else:
             raise ValueError(f"Invalid email address: {value}")
@@ -72,7 +72,7 @@ class Record:
         for phone in self.phones:
             if phone_number == phone.value:
                 return phone
-        raise ValueError("A phone with {phone_number} number is not found")
+        raise ValueError(f"A phone with {phone_number} number is not found")
 
     def remove_phone(self, phone_number: str) -> None:
         phone = self.find_phone(phone_number)
@@ -86,6 +86,22 @@ class Record:
             raise ValueError(
                 "To update a phone number the new value should't be empty."
             )
+        
+    # For validating phone and email use class constructors
+    def edit_phone(self, old_phone_number: str, new_phone_number: str) -> None:
+        if not new_phone_number:
+            raise ValueError("New phone number must be provided.")
+        
+        phone_to_edit = self.find_phone(old_phone_number)
+        validated_phone = Phone(new_phone_number)
+        phone_to_edit.value = validated_phone.value
+
+    def edit_email(self, new_email: str) -> None:
+        if not new_email:
+            raise ValueError("New email must be provided.")
+
+        validated_email = Email(new_email)
+        self.email = validated_email
 
     def __str__(self) -> str:
         parts = [f"Name: {self.name.value}"]

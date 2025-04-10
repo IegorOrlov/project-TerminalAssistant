@@ -1,6 +1,8 @@
 from error_handlers import input_error
 from address_book import AddressBook
 from record import Record
+from rich.console import Console
+from rich_helper import create_rich_table
 
 def add_contact(book: AddressBook) -> str:
     while True:
@@ -68,13 +70,89 @@ def add_contact(book: AddressBook) -> str:
     return f"Contact '{name}' has been saved successfully."
 
 @input_error
-def change_contact(args: tuple[str], book: AddressBook) -> str:
-    name, phone_old, phone_new, *_ = args
+def update_contact(book: AddressBook) -> str:
+    console = Console()
+
+    while True:
+        name = input("Enter the contact name to update: ").strip()
+        if name:
+            break
+        print("Contact name cannot be empty.")
     record = book.find(name)
-    if record:
-        record.edit_phone(phone_old, phone_new)
-        return "Contact updated."
-    return f"User {name} not found."
+    if not record:
+        return f"Contact '{name}' not found."
+
+    current_fields = [
+        ["Name", record.name.value],
+        ["Phone(s)", "; ".join(p.value for p in record.phones) if record.phones else "Not set"],
+        ["Address", str(record.address) if record.address else "Not set"],
+        ["Email", str(record.email) if record.email else "Not set"],
+        ["Birthday", str(record.birthday) if record.birthday else "Not set"],
+    ]
+    current_table = create_rich_table("Current Record", ["Field", "Value"], current_fields)
+    console.print(current_table)
+    
+    available_fields = ["phone", "address", "email", "birthday"]
+    fields_rows = [[field] for field in available_fields]
+    fields_table = create_rich_table("Available Fields to Change", ["Field"], fields_rows)
+    console.print(fields_table)
+    
+    while True:
+        field_to_change = input("Enter field to change: ").strip().lower()
+        if field_to_change in available_fields:
+            break
+        print("Invalid field. Please choose one of: phone, address, email, birthday.")
+    
+    if field_to_change in ["address", "email", "birthday"]:
+        current_value = getattr(record, field_to_change)
+        print(f"Current {field_to_change}: {current_value if current_value else 'Not set'}")
+        new_value = input(f"Enter new {field_to_change} (or press Enter to cancel): ").strip()
+        if new_value:
+            try:
+                if field_to_change == "address":
+                    record.add_address(new_value)
+                elif field_to_change == "email":
+                    record.edit_email(new_value)
+                elif field_to_change == "birthday":
+                    record.add_birthday(new_value)
+                return f"{field_to_change.capitalize()} updated for contact '{name}'."
+            except ValueError as e:
+                return f"Error updating {field_to_change}: {e}"
+        else:
+            return f"No changes made to {field_to_change}."
+
+    elif field_to_change == "phone":
+        if not record.phones:
+            return "No phone numbers to change."
+        else:
+            phone_rows = [[str(idx), phone.value] for idx, phone in enumerate(record.phones, start=1)]
+            phone_table = create_rich_table("Phone Numbers", ["Index", "Phone"], phone_rows)
+            console.print(phone_table)
+
+            while True:
+                index_input = input("Enter the number corresponding to the phone you want to change: ").strip()
+                if index_input.isdigit():
+                    index = int(index_input)
+                    if 1 <= index <= len(record.phones):
+                        break
+                    else:
+                        print("Invalid number. Try again.")
+                else:
+                    print("Please enter a valid number.")
+            old_phone = record.phones[index - 1].value
+            new_phone = input("Enter new phone (or press Enter to delete this phone): ").strip()
+            if new_phone:
+                try:
+                    record.edit_phone(old_phone, new_phone)
+                    return "Phone number updated."
+                except ValueError as e:
+                    return f"Error updating phone: {e}"
+            else:
+                try:
+                    record.remove_phone(old_phone)
+                    return "Phone number removed."
+                except ValueError as e:
+                    return f"Error removing phone: {e}"
 
 
 @input_error
@@ -88,21 +166,22 @@ def show_phone(args: tuple[str], book: AddressBook) -> str:
 
 @input_error
 def show_all(book: AddressBook) -> str:
-    result = ""
+    console = Console()
+
+    columns = ["Name", "Phones", "Birthday", "Address", "Email"]
+    rows = []
+    
     for name, record in book.items():
-        result = result + f"{record}\n"
-    return result.strip()
-
-
-@input_error
-def add_birthday(args: tuple[str], book: AddressBook) -> str:
-    name, birthday, *_ = args
-    record = book.find(name)
-    if record:
-        record.add_birthday(birthday)
-        return f"The birthday date {birthday} has been added into {name}'s record."
-    else:
-        return f"User {name} not found."
+        phones = ", ".join(p.value for p in record.phones) if record.phones else "Not set"
+        birthday = str(record.birthday) if record.birthday else "Not set"
+        address = str(record.address) if record.address else "Not set"
+        email = str(record.email) if record.email else "Not set"
+        
+        rows.append([record.name.value, phones, birthday, address, email])
+    
+    table = create_rich_table("All Contacts", columns, rows)
+    
+    console.print(table)
 
 
 @input_error
@@ -136,24 +215,3 @@ def birthdays(book: AddressBook) -> str:
     return "\n".join(
         f"Upcoming {record.name.value}'s birthday is {record.birthday}" for record in upcoming
     )
-
-@input_error
-def add_address(args: tuple[str], book: AddressBook) -> str:
-    name, address, *_ = args
-    record = book.find(name)
-    if record:
-        record.add_address(address)
-        return f"Address '{address}' has been added for contact '{name}'."
-    else:
-        return f"User {name} not found."
-
-
-@input_error
-def add_email(args: tuple[str], book: AddressBook) -> str:
-    name, email, *_ = args
-    record = book.find(name)
-    if record:
-        record.add_email(email)
-        return f"Email '{email}' has been added for contact '{name}'."
-    else:
-        return f"User {name} not found."
