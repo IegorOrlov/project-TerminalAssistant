@@ -5,6 +5,7 @@ from command_handlers import (
     show_all,
     show_birthday,
     birthdays,
+    search_contact
 )
 from address_book import AddressBook
 from data_service import save_data, load_data
@@ -33,6 +34,8 @@ def main():
             print(add_contact(book))
         elif command == "update-contact": 
             print(update_contact(book))
+        elif command == "search-contact":
+            print(search_contact(book))
         elif command == "phone":
             print(show_phone(args, book))
         elif command == "all":
