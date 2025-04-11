@@ -153,7 +153,7 @@ def update_contact(book: AddressBook) -> str:
                     return "Phone number removed."
                 except ValueError as e:
                     return f"Error removing phone: {e}"
-                
+                    
 @input_error
 def search_contact(book: AddressBook) -> str:
     from rich.console import Console
@@ -193,7 +193,6 @@ def search_contact(book: AddressBook) -> str:
     table = create_rich_table("Search Results", columns, rows)
     console.print(table)
     return ""
-
 
 
 @input_error
