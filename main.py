@@ -5,10 +5,7 @@ from command_handlers import (
     show_all,
     show_birthday,
     birthdays,
-<<<<<<< HEAD
     search_contact
-=======
->>>>>>> main
 )
 from address_book import AddressBook
 from data_service import save_data, load_data
