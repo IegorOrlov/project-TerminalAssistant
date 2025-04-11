@@ -78,14 +78,6 @@ class Record:
         phone = self.find_phone(phone_number)
         self.phones.remove(phone)
 
-    def edit_phone(self, old_phone_number: str, new_phone_number: str) -> None:
-        phone = self.find_phone(old_phone_number)
-        if new_phone_number:
-            phone.value = new_phone_number
-        else:
-            raise ValueError(
-                "To update a phone number the new value should't be empty."
-            )
         
     # For validating phone and email use class constructors
     def edit_phone(self, old_phone_number: str, new_phone_number: str) -> None:
@@ -104,13 +96,13 @@ class Record:
         self.email = validated_email
 
     def __str__(self) -> str:
-        parts = [f"Name: {self.name.value}"]
+        parts = [self.name.value.__str__()]
         if self.phones:
-            parts.append(f"Phones: {'; '.join(p.value for p in self.phones)}")
+            parts.append(', '.join(p.value.__str__() for p in self.phones))
         if self.birthday:
-            parts.append(f"Birthday: {self.birthday}")
+            parts.append(self.birthday.__str__())
         if self.address:
-            parts.append(f"Address: {self.address}")
+            parts.append(self.address.__str__())
         if self.email:
-            parts.append(f"Email: {self.email}")
-        return ", ".join(parts)
+            parts.append(self.email.__str__())
+        return "; ".join(parts)

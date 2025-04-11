@@ -3,10 +3,11 @@ from address_book import AddressBook
 from record import Record
 from rich.console import Console
 from rich_helper import create_rich_table, create_contact_table
-from note_book import NoteBook, Note
-from typing import Callable
+from note_book import NoteBook, Note, Tag
+from typing import Callable, Any
 
 REQUIRED_MSG = "Enter required value of {}: "
+UPDATE_MSG = "Enter new {} (or press Enter to skip): "
 
 
 def add_contact(book: AddressBook) -> str:
@@ -81,9 +82,30 @@ def add_contact(book: AddressBook) -> str:
     return f"Contact '{name}' has been saved successfully."
 
 
-def find_note(note_book: NoteBook) -> str:
-    title = input("Enter a title to search: ")
-    return note_book.find(title)
+def find_note(note_book: NoteBook) -> None:
+    key = input("Enter a title or tag to search: ")
+    note = note_book.find(key)
+    if not note:
+        key_tag = Tag(key)
+        show_as_table([note for note in note_book.values() if key_tag in note.tags], f"Matched notes to '{key}' tag")
+    else: 
+        show_as_table([note], "The note for '{key}' title")
+
+
+def update_note(note_book: NoteBook) -> None:
+    title = input("Enter a title of note to update: ")
+    
+    note = note_book.find(title)
+    show_as_table([note], "This note is being updated")
+
+    __enter_value("title", note.add_title, False, UPDATE_MSG)
+    __enter_value("text", note.add_text, False, UPDATE_MSG)
+    __enter_value(
+        "tags",
+        note.add_tags,
+        False,
+        "Enter new {} separated by spaces (or press Enter to skip): ",
+    )
 
 
 def add_note(note_book: NoteBook) -> None:
@@ -132,22 +154,28 @@ def update_contact(book: AddressBook) -> str:
 
     current_table = create_contact_table("Current Record", record)
     console.print(current_table)
-    
+
     available_fields = ["phone", "address", "email", "birthday"]
     fields_rows = [[field] for field in available_fields]
-    fields_table = create_rich_table("Available Fields to Change", ["Field"], fields_rows)
+    fields_table = create_rich_table(
+        "Available Fields to Change", ["Field"], fields_rows
+    )
     console.print(fields_table)
-    
+
     while True:
         field_to_change = input("Enter field to change: ").strip().lower()
         if field_to_change in available_fields:
             break
         print("Invalid field. Please choose one of: phone, address, email, birthday.")
-    
+
     if field_to_change in ["address", "email", "birthday"]:
         current_value = getattr(record, field_to_change)
-        print(f"Current {field_to_change}: {current_value if current_value else 'Not set'}")
-        new_value = input(f"Enter new {field_to_change} (or press Enter to cancel): ").strip()
+        print(
+            f"Current {field_to_change}: {current_value if current_value else 'Not set'}"
+        )
+        new_value = input(
+            f"Enter new {field_to_change} (or press Enter to cancel): "
+        ).strip()
         if new_value:
             try:
                 if field_to_change == "address":
@@ -166,12 +194,19 @@ def update_contact(book: AddressBook) -> str:
         if not record.phones:
             return "No phone numbers to change."
         else:
-            phone_rows = [[str(idx), phone.value] for idx, phone in enumerate(record.phones, start=1)]
-            phone_table = create_rich_table("Phone Numbers", ["Index", "Phone"], phone_rows)
+            phone_rows = [
+                [str(idx), phone.value]
+                for idx, phone in enumerate(record.phones, start=1)
+            ]
+            phone_table = create_rich_table(
+                "Phone Numbers", ["Index", "Phone"], phone_rows
+            )
             console.print(phone_table)
 
             while True:
-                index_input = input("Enter the number corresponding to the phone you want to change: ").strip()
+                index_input = input(
+                    "Enter the number corresponding to the phone you want to change: "
+                ).strip()
                 if index_input.isdigit():
                     index = int(index_input)
                     if 1 <= index <= len(record.phones):
@@ -181,7 +216,9 @@ def update_contact(book: AddressBook) -> str:
                 else:
                     print("Please enter a valid number.")
             old_phone = record.phones[index - 1].value
-            new_phone = input("Enter new phone (or press Enter to delete this phone): ").strip()
+            new_phone = input(
+                "Enter new phone (or press Enter to delete this phone): "
+            ).strip()
             if new_phone:
                 try:
                     record.edit_phone(old_phone, new_phone)
@@ -194,7 +231,8 @@ def update_contact(book: AddressBook) -> str:
                     return "Phone number removed."
                 except ValueError as e:
                     return f"Error removing phone: {e}"
-                    
+
+
 @input_error
 def search_contact(book: AddressBook) -> str:
     from rich.console import Console
@@ -203,67 +241,71 @@ def search_contact(book: AddressBook) -> str:
     search_term = input("Enter search term (name, phone or email): ").strip().lower()
     if not search_term:
         return "Search term cannot be empty."
-    
+
     matching_records = []
-    
+
     for name, record in book.items():
         if search_term in record.name.value.lower():
             matching_records.append(record)
             continue
-        
+
         if record.email and search_term in str(record.email).lower():
             matching_records.append(record)
             continue
-        
+
         for phone in record.phones:
             if search_term in phone.value:
                 matching_records.append(record)
                 break
-    
+
     if not matching_records:
         return "No matching contacts found."
-    
+
     columns = ["Name", "Phones", "Email"]
     rows = []
     for rec in matching_records:
         phones_str = ", ".join(p.value for p in rec.phones) if rec.phones else "Not set"
         email_str = str(rec.email) if rec.email else "Not set"
         rows.append([rec.name.value, phones_str, email_str])
-    
+
     console = Console()
     table = create_rich_table("Search Results", columns, rows)
     console.print(table)
     return ""
 
 
-
 @input_error
 def delete_contact(book: AddressBook) -> str:
     console = Console()
-    
+
     while True:
         name = input("Enter the contact name to delete: ").strip()
         if name:
             break
         print("Contact name cannot be empty.")
-    
+
     record = book.find(name)
     if not record:
         return f"Contact '{name}' not found."
 
     current_table = create_contact_table("Contact to Delete", record)
     console.print(current_table)
-    
-    confirmation = input(f"Are you sure you want to delete contact '{name}'? (y/n): ").strip().lower()
+
+    confirmation = (
+        input(f"Are you sure you want to delete contact '{name}'? (y/n): ")
+        .strip()
+        .lower()
+    )
     if confirmation != "y":
         return "Deletion cancelled."
-    
+
     try:
         book.delete(name)
         return f"Contact '{name}' was deleted successfully."
     except KeyError:
         return f"Error: Contact '{name}' not found during deletion."
-    
+
+
 @input_error
 def show_phone(args: tuple[str], book: AddressBook) -> str:
     name, *_ = args
@@ -274,23 +316,17 @@ def show_phone(args: tuple[str], book: AddressBook) -> str:
 
 
 @input_error
-def show_all(book: AddressBook) -> str:
-    console = Console()
+def show_as_table(items: list, table_name: str) -> None:
+    columns = (
+        [key.capitalize() for key in vars(items[0]).keys()]
+        if items
+        else items
+    )
+    rows = [item.__str__().split(";") for item in items]
 
-    columns = ["Name", "Phones", "Birthday", "Address", "Email"]
-    rows = []
-    
-    for name, record in book.items():
-        phones = ", ".join(p.value for p in record.phones) if record.phones else "Not set"
-        birthday = str(record.birthday) if record.birthday else "Not set"
-        address = str(record.address) if record.address else "Not set"
-        email = str(record.email) if record.email else "Not set"
-        
-        rows.append([record.name.value, phones, birthday, address, email])
-    
-    table = create_rich_table("All Contacts", columns, rows)
-    
-    console.print(table)
+    table = create_rich_table(table_name, columns, rows)
+
+    Console().print(table)
 
 
 @input_error

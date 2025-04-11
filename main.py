@@ -3,12 +3,13 @@ from command_handlers import (
     update_contact,
     delete_contact,
     show_phone,
-    show_all,
+    show_as_table,
     show_birthday,
     birthdays,
     search_contact,
     add_note,
-    find_note
+    find_note,
+    update_note,
 )
 from address_book import AddressBook
 from data_service import save_data, load_data
@@ -38,18 +39,20 @@ def main():
             print(add_contact(address_book))
         elif command == "add-note":
             print(add_note(note_book))
-        elif command == "update-contact": 
+        elif command == "update-contact":
             print(update_contact(address_book))
+        elif command == "update-note":
+            print(update_note(note_book))
         elif command == "delete-contact":
             print(delete_contact(address_book))
         elif command == "search-contact":
             print(search_contact(address_book))
         elif command == "phone":
             print(show_phone(args, address_book))
-        elif command == "all-records":
-            print(show_all(address_book))
-        # elif command == "all-notes":
-            # print(show_all(note_book))
+        elif command == "all-contacts":
+            print(show_as_table(list(address_book.values()), "All Contacts"))
+        elif command == "all-notes":
+            print(show_as_table(list(note_book.values()), "All Notes"))
         elif command == "find-note":
             print(find_note(note_book))
         elif command == "show-birthday":
