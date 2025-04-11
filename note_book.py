@@ -14,6 +14,9 @@ class Tag(Field):
     def __str__(self):
         return "#" + super().__str__()
 
+    def __eq__(self, other):
+        return self.value == other.value
+
 
 class Note:
     def __init__(self) -> None:
@@ -28,15 +31,15 @@ class Note:
         self.text = Text(text)
 
     def add_tags(self, tags: str) -> None:
-        self.tags.extend([Tag(tag) for tag in tags.split(" ")])
+        self.tags = [Tag(tag) for tag in tags.split(" ")]
 
     def __str__(self) -> str:
-        parts = [f"Title: {self.title}"]
+        parts = [self.title.__str__()]
         if self.text:
-            parts.append(f"Text: {self.text}")
+            parts.append(self.text.__str__())
         if self.tags:
-            parts.append(f"Tags: {'; '.join(tag.__str__() for tag in self.tags)}")
-        return ", ".join(parts)
+            parts.append(", ".join(tag.__str__() for tag in self.tags))
+        return "; ".join(parts)
 
 
 class NoteBook(UserDict[str, Note]):
@@ -47,4 +50,7 @@ class NoteBook(UserDict[str, Note]):
         return self.data.get(title)
 
     def delete(self, title: str) -> Note:
-        return self.data.pop(title)
+        try:
+            return self.data.pop(title)
+        except KeyError as ex:
+            raise KeyError(f"There isn't a note with '{title}' title.")
