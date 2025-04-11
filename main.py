@@ -10,11 +10,33 @@ from command_handlers import (
     add_note,
     find_note,
     update_note,
-    delete_note
+    delete_note,
 )
 from address_book import AddressBook
 from data_service import save_data, load_data
 from note_book import NoteBook
+from rich_helper import print_rich_table
+
+HEADER = ["Comand", "Description"]
+
+COMMANDS = [
+    ["add-contact", "Add a new contact to the address book"],
+    ["add-note", "Add a new note to the note book"],
+    ["all-contacts", "Show all contacts in the address book"],
+    ["all-notes", "Show all notes in the note book"],
+    ["birthdays", "Show all upcoming birthdays in the address book"],
+    ["close", "Close the application and save the data"],
+    ["delete-contact", "Delete a contact from the address book"],
+    ["delete-note", "Delete a note from the note book"],
+    ["exit", "Exit the application and save the data"],
+    ["find-note", "Find a specific note"],
+    ["hello", "Start a dialog with the bot"],
+    ["phone", "Show the phone number for a specific contact"],
+    ["search-contact", "Search for a contact in the address book"],
+    ["show-birthday", "Show birthday information for a specific contact"],
+    ["update-contact", "Update an existing contact in the address book"],
+    ["update-note", "Update an existing note in the note book"],
+]
 
 
 def parse_input(user_input: str) -> tuple[str, tuple[str]]:
@@ -26,6 +48,7 @@ def parse_input(user_input: str) -> tuple[str, tuple[str]]:
 def main():
     address_book, note_book = load_data()
     print("Welcome to the assistant bot!")
+    print_rich_table("Available Commands", HEADER, COMMANDS)
     while True:
         user_input = input("Enter a command: ")
         command, *args = parse_input(user_input)

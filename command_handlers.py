@@ -1,8 +1,7 @@
 from error_handlers import input_error
 from address_book import AddressBook
 from record import Record
-from rich.console import Console
-from rich_helper import create_rich_table, create_contact_table
+from rich_helper import print_rich_table, print_contact_table
 from note_book import NoteBook, Note, Tag
 from typing import Callable, Any
 
@@ -157,7 +156,6 @@ def __enter_value(
 
 @input_error
 def update_contact(book: AddressBook) -> str:
-    console = Console()
 
     while True:
         name = input("Enter the contact name to update: ").strip()
@@ -168,15 +166,11 @@ def update_contact(book: AddressBook) -> str:
     if not record:
         return f"Contact '{name}' not found."
 
-    current_table = create_contact_table("Current Record", record)
-    console.print(current_table)
+    print_contact_table("Current Record", record)
 
     available_fields = ["phone", "address", "email", "birthday"]
     fields_rows = [[field] for field in available_fields]
-    fields_table = create_rich_table(
-        "Available Fields to Change", ["Field"], fields_rows
-    )
-    console.print(fields_table)
+    print_rich_table("Available Fields to Change", ["Field"], fields_rows)
 
     while True:
         field_to_change = input("Enter field to change: ").strip().lower()
@@ -214,10 +208,7 @@ def update_contact(book: AddressBook) -> str:
                 [str(idx), phone.value]
                 for idx, phone in enumerate(record.phones, start=1)
             ]
-            phone_table = create_rich_table(
-                "Phone Numbers", ["Index", "Phone"], phone_rows
-            )
-            console.print(phone_table)
+            print_rich_table("Phone Numbers", ["Index", "Phone"], phone_rows)
 
             while True:
                 index_input = input(
@@ -252,7 +243,7 @@ def update_contact(book: AddressBook) -> str:
 @input_error
 def search_contact(book: AddressBook) -> str:
     from rich.console import Console
-    from rich_helper import create_rich_table
+    from rich_helper import print_rich_table
 
     search_term = input("Enter search term (name, phone or email): ").strip().lower()
     if not search_term:
@@ -284,16 +275,12 @@ def search_contact(book: AddressBook) -> str:
         email_str = str(rec.email) if rec.email else "Not set"
         rows.append([rec.name.value, phones_str, email_str])
 
-    console = Console()
-    table = create_rich_table("Search Results", columns, rows)
-    console.print(table)
+    print_rich_table("Search Results", columns, rows)
     return ""
 
 
 @input_error
 def delete_contact(book: AddressBook) -> str:
-    console = Console()
-
     while True:
         name = input("Enter the contact name to delete: ").strip()
         if name:
@@ -304,8 +291,7 @@ def delete_contact(book: AddressBook) -> str:
     if not record:
         return f"Contact '{name}' not found."
 
-    current_table = create_contact_table("Contact to Delete", record)
-    console.print(current_table)
+    print_contact_table("Contact to Delete", record)
 
     confirmation = (
         input(f"Are you sure you want to delete contact '{name}'? (y/n): ")
@@ -336,9 +322,7 @@ def show_as_table(items: list, table_name: str) -> None:
     columns = [key.capitalize() for key in vars(items[0]).keys()] if items else items
     rows = [item.__str__().split(";") for item in items]
 
-    table = create_rich_table(table_name, columns, rows)
-
-    Console().print(table)
+    print_rich_table(table_name, columns, rows)
 
 
 @input_error
