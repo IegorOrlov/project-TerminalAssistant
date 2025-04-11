@@ -146,6 +146,46 @@ def update_contact(book: AddressBook) -> str:
                     return "Phone number removed."
                 except ValueError as e:
                     return f"Error removing phone: {e}"
+                    
+@input_error
+def search_contact(book: AddressBook) -> str:
+    from rich.console import Console
+    from rich_helper import create_rich_table
+
+    search_term = input("Enter search term (name, phone or email): ").strip().lower()
+    if not search_term:
+        return "Search term cannot be empty."
+    
+    matching_records = []
+    
+    for name, record in book.items():
+        if search_term in record.name.value.lower():
+            matching_records.append(record)
+            continue
+        
+        if record.email and search_term in str(record.email).lower():
+            matching_records.append(record)
+            continue
+        
+        for phone in record.phones:
+            if search_term in phone.value:
+                matching_records.append(record)
+                break
+    
+    if not matching_records:
+        return "No matching contacts found."
+    
+    columns = ["Name", "Phones", "Email"]
+    rows = []
+    for rec in matching_records:
+        phones_str = ", ".join(p.value for p in rec.phones) if rec.phones else "Not set"
+        email_str = str(rec.email) if rec.email else "Not set"
+        rows.append([rec.name.value, phones_str, email_str])
+    
+    console = Console()
+    table = create_rich_table("Search Results", columns, rows)
+    console.print(table)
+    return ""
 
 
 
