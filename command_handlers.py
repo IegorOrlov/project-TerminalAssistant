@@ -82,19 +82,34 @@ def add_contact(book: AddressBook) -> str:
     return f"Contact '{name}' has been saved successfully."
 
 
+@input_error
 def find_note(note_book: NoteBook) -> None:
     key = input("Enter a title or tag to search: ")
     note = note_book.find(key)
     if not note:
         key_tag = Tag(key)
-        show_as_table([note for note in note_book.values() if key_tag in note.tags], f"Matched notes to '{key}' tag")
-    else: 
+        show_as_table(
+            [note for note in note_book.values() if key_tag in note.tags],
+            f"Matched notes to '{key}' tag",
+        )
+    else:
         show_as_table([note], "The note for '{key}' title")
 
 
+@input_error
+def delete_note(note_book: NoteBook) -> None:
+    key = input("Enter a title to delete note: ")
+    note = note_book.delete(key)
+    if note:
+        show_as_table([note], "The note has been deleted")
+    else:
+        print(f"There isn't ant note with '{key}' title.")
+
+
+@input_error
 def update_note(note_book: NoteBook) -> None:
     title = input("Enter a title of note to update: ")
-    
+
     note = note_book.find(title)
     show_as_table([note], "This note is being updated")
 
@@ -108,6 +123,7 @@ def update_note(note_book: NoteBook) -> None:
     )
 
 
+@input_error
 def add_note(note_book: NoteBook) -> None:
     note = Note()
     __enter_value("title", note.add_title, True, REQUIRED_MSG)
@@ -317,11 +333,7 @@ def show_phone(args: tuple[str], book: AddressBook) -> str:
 
 @input_error
 def show_as_table(items: list, table_name: str) -> None:
-    columns = (
-        [key.capitalize() for key in vars(items[0]).keys()]
-        if items
-        else items
-    )
+    columns = [key.capitalize() for key in vars(items[0]).keys()] if items else items
     rows = [item.__str__().split(";") for item in items]
 
     table = create_rich_table(table_name, columns, rows)
