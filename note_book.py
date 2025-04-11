@@ -13,7 +13,7 @@ class Text(Field):
 class Tag(Field):
     def __str__(self):
         return "#" + super().__str__()
-    
+
     def __eq__(self, other):
         return self.value == other.value
 
@@ -38,7 +38,7 @@ class Note:
         if self.text:
             parts.append(self.text.__str__())
         if self.tags:
-            parts.append(', '.join(tag.__str__() for tag in self.tags))
+            parts.append(", ".join(tag.__str__() for tag in self.tags))
         return "; ".join(parts)
 
 
@@ -50,4 +50,7 @@ class NoteBook(UserDict[str, Note]):
         return self.data.get(title)
 
     def delete(self, title: str) -> Note:
-        return self.data.pop(title)
+        try:
+            return self.data.pop(title)
+        except KeyError as ex:
+            raise KeyError(f"There isn't a note with '{title}' title.")

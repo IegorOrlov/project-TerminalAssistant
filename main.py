@@ -10,6 +10,7 @@ from command_handlers import (
     add_note,
     find_note,
     update_note,
+    delete_note
 )
 from address_book import AddressBook
 from data_service import save_data, load_data
@@ -43,6 +44,8 @@ def main():
             print(update_contact(address_book))
         elif command == "update-note":
             print(update_note(note_book))
+        elif command == "delete-note":
+            print(delete_note(note_book))
         elif command == "delete-contact":
             print(delete_contact(address_book))
         elif command == "search-contact":
