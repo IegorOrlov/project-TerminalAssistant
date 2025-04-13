@@ -17,7 +17,14 @@ from data_service import save_data, load_data
 from note_book import NoteBook
 from rich_helper import print_rich_table
 
-HEADER = ["Comand", "Description"]
+from prompt_config import (
+    CommandAutoSuggest,
+    create_prompt_session,
+    get_bindings,
+    prompt_input,
+)
+
+HEADER = ["Command", "Description"]
 
 COMMANDS = [
     ["add-contact", "Add a new contact to the address book"],
@@ -36,10 +43,15 @@ COMMANDS = [
     ["show-birthday", "Show birthday information for a specific contact"],
     ["update-contact", "Update an existing contact in the address book"],
     ["update-note", "Update an existing note in the note book"],
+    ["help", "Show this help message"],
 ]
 
 
-def parse_input(user_input: str) -> tuple[str, tuple[str]]:
+suggest = CommandAutoSuggest([cmd[0] for cmd in COMMANDS])
+bindings = get_bindings()
+session = create_prompt_session()
+
+def parse_input(user_input: str) -> tuple[str, list[str]]:
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
     return cmd, *args
@@ -50,44 +62,54 @@ def main():
     print("Welcome to the assistant bot!")
     print_rich_table("Available Commands", HEADER, COMMANDS)
     while True:
-        user_input = input("Enter a command: ")
-        command, *args = parse_input(user_input)
+        try:
+            user_input = prompt_input(session, suggest, bindings)
 
-        if command in ["close", "exit"]:
+            if not user_input.strip():
+                continue
+
+            command, *args = parse_input(user_input)
+
+            if command in ["close", "exit"]:
+                save_data(address_book, note_book)
+                print("Good bye!")
+                break
+            elif command == "hello":
+                print("How can I help you?")
+            elif command == "add-contact":
+                print(add_contact(address_book))
+            elif command == "add-note":
+                print(add_note(note_book))
+            elif command == "update-contact":
+                print(update_contact(address_book))
+            elif command == "update-note":
+                print(update_note(note_book))
+            elif command == "delete-note":
+                print(delete_note(note_book))
+            elif command == "delete-contact":
+                print(delete_contact(address_book))
+            elif command == "search-contact":
+                print(search_contact(address_book))
+            elif command == "phone":
+                print(show_phone(args, address_book))
+            elif command == "all-contacts":
+                print(show_as_table(list(address_book.values()), "All Contacts"))
+            elif command == "all-notes":
+                print(show_as_table(list(note_book.values()), "All Notes"))
+            elif command == "find-note":
+                print(find_note(note_book))
+            elif command == "show-birthday":
+                print(show_birthday(args, address_book))
+            elif command == "birthdays":
+                print(birthdays(address_book))
+            elif command == "help":
+                print_rich_table("Available Commands", HEADER, COMMANDS)
+            else:
+                print("Invalid command.")
+        except (EOFError, KeyboardInterrupt):
+            print("\nGood bye!")
             save_data(address_book, note_book)
-            print("Good bye!")
             break
-        elif command == "hello":
-            print("How can I help you?")
-        elif command == "add-contact":
-            print(add_contact(address_book))
-        elif command == "add-note":
-            print(add_note(note_book))
-        elif command == "update-contact":
-            print(update_contact(address_book))
-        elif command == "update-note":
-            print(update_note(note_book))
-        elif command == "delete-note":
-            print(delete_note(note_book))
-        elif command == "delete-contact":
-            print(delete_contact(address_book))
-        elif command == "search-contact":
-            print(search_contact(address_book))
-        elif command == "phone":
-            print(show_phone(args, address_book))
-        elif command == "all-contacts":
-            print(show_as_table(list(address_book.values()), "All Contacts"))
-        elif command == "all-notes":
-            print(show_as_table(list(note_book.values()), "All Notes"))
-        elif command == "find-note":
-            print(find_note(note_book))
-        elif command == "show-birthday":
-            print(show_birthday(args, address_book))
-        elif command == "birthdays":
-            print(birthdays(address_book))
-        else:
-            print("Invalid command.")
-
 
 if __name__ == "__main__":
     main()
