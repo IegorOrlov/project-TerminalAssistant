@@ -1,4 +1,3 @@
-# file: prompt_config.py
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import HTML
@@ -7,7 +6,6 @@ from prompt_toolkit.auto_suggest import AutoSuggest, Suggestion
 from prompt_toolkit.key_binding import KeyBindings
 
 
-# === Командна підказка ===
 class CommandAutoSuggest(AutoSuggest):
     def __init__(self, command_names: list[str]):
         self.command_names = command_names
@@ -20,13 +18,11 @@ class CommandAutoSuggest(AutoSuggest):
         return None
 
 
-# === Стиль для плейсхолдера ===
 style = Style.from_dict({
     'placeholder': 'ansigray italic'
 })
 
 
-# === Key Bindings: TAB вставляє підказку ===
 def get_bindings():
     bindings = KeyBindings()
 
@@ -40,12 +36,10 @@ def get_bindings():
     return bindings
 
 
-# === Створення prompt-сесії ===
 def create_prompt_session():
     return PromptSession()
 
 
-# === Prompt конфігурація ===
 def prompt_input(session, suggest, bindings):
     return session.prompt(
         '>>> ',
